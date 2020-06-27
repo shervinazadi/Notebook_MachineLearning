@@ -11,24 +11,36 @@ boston = skl_ds.load_boston()
 X = pd.DataFrame(boston.data, columns=boston.feature_names)  # Feature Matrix
 Y = pd.DataFrame(boston.target, columns=["MEDV"])  # Target Variable
 
-# no of features
-nof_list = np.arange(1, 13)
-high_score = 0
-# Variable to store the optimum features
-nof = 0
-score_list = []
-for n in range(len(nof_list)):
-    X_train, X_test, Y_train, Y_test = skl_ms.train_test_split(
-        X, Y, test_size=0.3, random_state=0)
+
+# Spliting the dataset into training subset (70%) and testinf subset (%30)
+X_train, X_test, Y_train, Y_test = skl_ms.train_test_split(
+    X, Y, test_size=0.3, random_state=0)
+
+# initiating the score list
+score_list = [0.0]
+selected_feature_masks = [['']]
+for n in range(1, len(X.columns)):
+    # constructing the regression model
     model = skl_lm.LinearRegression()
-    rfe = skl_fs.RFE(model, n_features_to_select=nof_list[n])
+    # initiate the RFE model
+    rfe = skl_fs.RFE(model, n_features_to_select=n)
+    # finding the most relevant features based on recursively fitting the "model" object passed in the previous step; and removing the non-selected features from X_train
     X_train_rfe = rfe.fit_transform(X_train, Y_train)
+    # removing the non-selected features from X_test
     X_test_rfe = rfe.transform(X_test)
+    # fitting the regression model only with the selected features
     model.fit(X_train_rfe, Y_train)
+    # scoring the model with the test data
     score = model.score(X_test_rfe, Y_test)
+    #  storing the score value
     score_list.append(score)
-    if(score > high_score):
-        high_score = score
-        nof = nof_list[n]
-print("Optimum number of features: %d" % nof)
-print("Score with %d features: %f" % (nof, high_score))
+    # storing the feature mask
+    selected_feature_masks.append(rfe.support_)
+
+# retrieving the name of features
+features = np.array(X.columns)
+score_list = np.array(score_list)
+# finding the index of the maximum score -> finding the feature mask used by RFE for the maximum score -> masking the features list with the corresponding mask
+SelFeat = features[selected_feature_masks[score_list.argmax()]]
+# print the list of selected features
+print(SelFeat)
