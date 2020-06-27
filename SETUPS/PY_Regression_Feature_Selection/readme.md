@@ -23,3 +23,7 @@ trains a predictive model to evaluate different subsets of features.
 combining the advantages of previous approaches
 
 For further reading you can refer to [Feature selection - Wikipedia](https://en.wikipedia.org/wiki/Feature_selection)
+
+---
+
+Libraries:[Plotly](https://plotly.com/python),[NumPy](https://numpy.org/), [Statsmodels](https://www.statsmodels.org/stable/index.html), [scikit-learn](https://scikit-learn.org/stable/index.html)
