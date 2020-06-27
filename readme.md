@@ -8,12 +8,17 @@ This is an educational collection of data analsis and machine learning setups ga
   - Symbolic
   - Numerical
   - Automatic (Algorithmic)
+- Feature Selection
+  - Filter Method
+  - Wrapper Method
+  - Embedded Method
 
 ## Contents (Based on Platform)
 
 - Python
-  - NumPy, SciPy
-  - scikit-learn
+  - [NumPy](https://numpy.org/), SciPy
+  - [scikit-learn](https://scikit-learn.org/stable/index.html)
+  - [Statsmodels](https://www.statsmodels.org/stable/index.html)
   - JAX
 
 ## Examples
