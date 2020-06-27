@@ -1,7 +1,7 @@
-import plotly.figure_factory as pff
+
 from sklearn.datasets import load_boston
 import pandas as pd
-import numpy as np
+import statsmodels.api as sm
 
 # Loading the dataset
 boston = load_boston()
@@ -9,42 +9,34 @@ X = pd.DataFrame(boston.data, columns=boston.feature_names)  # Feature Matrix
 Y = pd.DataFrame(boston.target, columns=["MEDV"])  # Target Variable
 
 
-# Filtering: Pearson correlation: https://en.wikipedia.org/wiki/Pearson_correlation_coefficient
+# Backward Elimination
+# we assume that all the features (columns) in dataset are usefull. Therefore we put their names in Selected Features variable (SelFeat)
+SelFeat = list(X.columns)
 
-Data = pd.concat([X, Y], axis=1)
-CoRel = Data.corr()
+while (len(SelFeat) > 0):
+    # First we make the regression model, in this case Ordinary Least Squares(OLS): https://en.wikipedia.org/wiki/Ordinary_least_squares
 
-# Plotting the heat map of Pearson Correlation for all features in relation to each other
-# fig_1 = pff.create_annotated_heatmap(np.array(CoRel).round(decimals=2), colorscale='RdBu', x=list(Data.columns.values), y=list(Data.columns.values))
-# fig_1.show()
+    # extracting the selected features (columns) and adding constant 1 to them
+    X_1 = sm.add_constant(X[SelFeat])
+    # fitting the model
+    model = sm.OLS(Y, X_1).fit()
 
-# We are looking for correlation above 0.5 or below -0.5
-CoRel_Abs = abs(CoRel["MEDV"])
-SelFeat = CoRel_Abs[CoRel_Abs > 0.5]
+    # Second we extract the pvalues and eleminate the unncessary features
 
-# We need to make sure that Selected Features are independant of each other
-SelCoRel = Data[SelFeat.index.values].corr()
+    # extracting pvalues: : https://www.statsdirect.com/help/basics/p_values.html
+    pvals = model.pvalues
 
-# Plotting the heat map of Selected Features Correlation
-# fig_2 = pff.create_annotated_heatmap(np.array(SelCoRel).round(decimals=2), colorscale='RdBu', x=list(SelCoRel.columns.values), y=list(SelCoRel.columns.values))
-# fig_2.show()
+    # finding the feature with the maximum pvalue
+    pmax_val = max(pvals)
+    pmax_name = pvals.idxmax()
 
-# Checking for correlation of Selected feature beaing above 0.5 or below -0.5
-mask = np.array(0.5 < abs(SelCoRel.iloc[:-1, :-1]))  # droping target (MEDV)
-# droping the diagonal elements (since they are meaningless) and upper triangle (since it is repetative)
-mask *= np.tri(mask.shape[0], mask.shape[0], -1, dtype="bool")
-# finding the location of coorelated selected features
-SelCoRelInd = np.argwhere(mask)
+    # we are looking for pvalue > 0.05 to remove
+    if (pmax_val > 0.05):
+        # if the pmax value was greater than 0.05 remove it from the list of selected features
+        SelFeat.remove(pmax_name)
+    else:
+        # if the pmax value was not greater than 0.05, break the loop
+        break
 
-# checking the correlation of them (correlated selected features) with target
-TargetSelCoRel = np.array(abs(SelCoRel.iloc[-1]))
-
-# find the index of minimum correlation in each row
-MinInd = np.argmin(TargetSelCoRel[SelCoRelInd], axis=1)
-# find the index of non independant features
-NonIndFeat = SelCoRelInd[np.arange(MinInd.size), MinInd]
-
-# set dependand features to NaN and drop them
-SelFeat.iloc[NonIndFeat] = None
-SelFeat = SelFeat.dropna()
+# print the list of selected features
 print(SelFeat)

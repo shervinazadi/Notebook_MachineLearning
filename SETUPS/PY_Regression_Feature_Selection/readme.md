@@ -16,6 +16,8 @@ trains a predictive model to evaluate different subsets of features.
 - more specific selection with regards to the modelling technic
 - higher risk of overfitting in case of limited input data
 
+- In the example we utilize [Backward Elimination](https://en.wikipedia.org/wiki/Stepwise_regression). There are other approaches such as [Forward Selection, Bidirectional Elimination](https://en.wikipedia.org/wiki/Stepwise_regression) and [RFE](https://link.springer.com/content/pdf/10.1023/A:1012487302797.pdf).
+
 ### 3. Embedded Method
 
 combining the advantages of previous approaches
